@@ -1,0 +1,4 @@
+Flask==3.0.0
+pypdf==3.17.0
+werkzeug==3.0.1
+gunicorn==21.2.0

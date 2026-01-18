@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF目录编辑器 | 纯净工作台</title>
+    <!-- Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sky: {
+                            50: '#f0f9ff',
+                            500: '#0ea5e9',
+                            600: '#0284c7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .bg-pure-canvas {
+            background-color: #f8fafc;
+        }
+
+        .glass-sidebar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(40px) saturate(200%);
+            border-right: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(24px) saturate(160%);
+            border: 1px solid rgba(255, 255, 255, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .item-drag-handle {
+            cursor: grab;
+            color: #cbd5e1;
+            transition: color 0.2s;
+        }
+
+        .item-drag-handle:hover {
+            color: #0ea5e9;
+        }
+
+        .item-drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .sortable-ghost {
+            opacity: 0.2;
+            background: #f1f5f9 !important;
+            border: 2px dashed #0ea5e9 !important;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #e2e8f0;
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #cbd5e1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-section {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+    </style>
+</head>
+
+<body class="bg-pure-canvas text-slate-700 h-full overflow-hidden selection:bg-sky-500/10">
+    <div class="flex h-full">
+        <!-- Sidebar -->
+        <aside class="w-80 glass-sidebar flex flex-col shrink-0 z-20">
+            <div class="p-8">
+                <div class="flex items-center gap-3 mb-10">
+                    <div
+                        class="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center shadow-lg shadow-sky-500/10">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                            </path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg tracking-tight text-slate-800 uppercase">PDF Marker</h1>
+                        <p class="text-[9px] uppercase tracking-[0.3em] text-slate-400 font-bold">Pure Workspace</p>
+                    </div>
+                </div>
+
+                <!-- Info Panel -->
+                <div id="sidebar-info" class="space-y-6 hidden animate-section">
+                    <div class="space-y-2">
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Target Document
+                        </p>
+                        <div class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                            <p id="sidebar-file-name" class="font-bold text-sm text-slate-700 truncate mb-1">文件名.pdf</p>
+                            <p id="sidebar-file-meta" class="text-xs text-sky-500 font-bold">0 PAGES</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between pl-1">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Base
+                                Offset</label>
+                            <span class="text-[10px] text-slate-400 font-bold">PAGES</span>
+                        </div>
+                        <div class="relative group">
+                            <input type="number" id="page-offset" value="16"
+                                class="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all text-slate-700 font-bold">
+                        </div>
+                        <p class="text-[10px] text-slate-400 leading-relaxed px-1">调整文档正文起始页的页码偏差。</p>
+                    </div>
+                </div>
+
+                <!-- Placeholder -->
+                <div id="sidebar-empty" class="text-center py-24 opacity-20 select-none">
+                    <svg class="w-12 h-12 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4">
+                        </path>
+                    </svg>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em]">Idle Mode</p>
+                </div>
+            </div>
+
+            <!-- Action -->
+            <div class="mt-auto p-8 border-t border-slate-100">
+                <button id="btn-restart"
+                    class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-sky-500 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group">
+                    <svg class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                        </path>
+                    </svg>
+                    Reset Workspace
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 relative overflow-hidden flex flex-col">
+            <!-- Header Nav -->
+            <nav class="h-20 flex items-center justify-between px-10 shrink-0 glass-header z-10">
+                <div id="status-step" class="flex items-center">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.3)]"></div>
+                        <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] pt-0.5">Ready to
+                            Build</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div id="entry-count-pill"
+                        class="hidden animate-section px-4 py-1.5 bg-slate-100 rounded-full flex items-center gap-2">
+                        <span id="entry-count"
+                            class="text-[10px] font-black text-slate-500 uppercase tracking-widest leading-none">0
+                            ENTRIES</span>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- Canvas View -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar relative px-10 py-12 scroll-smooth">
+
+                <!-- Stage 1: Initial Upload -->
+                <section id="upload-section" class="max-w-xl mx-auto py-20 animate-section">
+                    <div class="text-center mb-12">
+                        <h2 class="text-3xl font-bold text-slate-800 mb-3 tracking-tight">导入 PDF 文档</h2>
+                        <p class="text-slate-400 text-sm font-medium tracking-wide">开始构建您的数字化书签索引</p>
+                    </div>
+
+                    <div id="upload-area"
+                        class="glass-card rounded-[2.5rem] p-16 text-center border-2 border-slate-100 hover:border-sky-500/30 hover:bg-white transition-all cursor-pointer group shadow-sm">
+                        <input type="file" id="file-input" accept=".pdf" class="hidden">
+                        <div
+                            class="w-20 h-20 bg-slate-50 rounded-[1.5rem] flex items-center justify-center mx-auto mb-8 transition-all group-hover:scale-110 shadow-inner group-hover:bg-sky-50">
+                            <svg class="w-10 h-10 text-slate-300 group-hover:text-sky-500 transition-colors" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="text-xl font-bold text-slate-700 mb-2">Drop it here</div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em]">or choose from files
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Stage 2: Strategy -->
+                <section id="toc-section" class="hidden max-w-4xl mx-auto space-y-8 animate-section">
+                    <div class="grid grid-cols-2 gap-8">
+                        <button id="btn-extract"
+                            class="glass-card p-12 rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
+                            <div
+                                class="w-14 h-14 bg-sky-500 rounded-2xl flex items-center justify-center mb-8 text-white shadow-lg shadow-sky-500/10 transition-transform group-hover:-rotate-3">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2 italic">Auto Scan</h3>
+                            <p class="text-sm text-slate-400 leading-relaxed font-medium">使用高精度算法解析文档元数据并自动生成树形书签。</p>
+                        </button>
+
+                        <button id="btn-manual"
+                            class="glass-card p-12 rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
+                            <div
+                                class="w-14 h-14 bg-slate-800 rounded-2xl flex items-center justify-center mb-8 text-white shadow-lg shadow-slate-800/10 transition-transform group-hover:rotate-3">
+                                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M12 4v16m8-8H4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold text-slate-800 mb-2 italic">Empty Canvas</h3>
+                            <p class="text-sm text-slate-400 leading-relaxed font-medium">从零开始编织您的导航栏，支持实时预览与层级拖拽排序。</p>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Stage 3: Workspace -->
+                <section id="edit-section" class="hidden max-w-5xl mx-auto animate-section">
+                    <div class="glass-card rounded-[2.5rem] overflow-hidden">
+                        <!-- Head -->
+                        <div class="p-8 px-10 border-b border-slate-100 flex items-center justify-between bg-white/50">
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-800">构建工作台</h2>
+                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Drag
+                                    handles to sort • Double click field to edit</p>
+                            </div>
+                            <button id="btn-add-entry"
+                                class="bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95">
+                                Create New
+                            </button>
+                        </div>
+                        <!-- List Container -->
+                        <div id="toc-list" class="p-8 space-y-4 min-h-[400px]">
+                            <!-- Draggable items -->
+                        </div>
+                    </div>
+
+                    <div class="mt-20 flex items-center justify-center pb-20">
+                        <button id="btn-generate"
+                            class="px-24 py-5 bg-sky-500 text-white rounded-[1.5rem] font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl shadow-sky-500/20">
+                            Confirm and Generate Output
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Stage 4: Result -->
+                <section id="download-section" class="hidden max-w-2xl mx-auto py-10 animate-section">
+                    <div class="glass-card p-20 rounded-[4rem] text-center">
+                        <div
+                            class="w-24 h-24 bg-white rounded-full flex items-center justify-center mx-auto mb-10 shadow-sm border border-slate-100 relative">
+                            <svg class="w-10 h-10 text-sky-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-3xl font-bold text-slate-800 mb-4 tracking-tighter">PROJECT COMPLETE</h2>
+                        <p class="text-slate-400 font-medium mb-16 leading-relaxed">文档处理完成，已增加 <span id="bookmark-count"
+                                class="text-sky-500 font-bold text-2xl mx-1">0</span> 个目录书签。</p>
+
+                        <button id="btn-download"
+                            class="w-full py-6 bg-slate-900 hover:bg-slate-800 text-white rounded-3xl text-lg font-bold shadow-xl transition-all flex items-center justify-center gap-4">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                    d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Export Document
+                        </button>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Processing -->
+    <div id="loading-overlay"
+        class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/60 backdrop-blur-3xl">
+        <div class="relative w-32 h-32">
+            <div class="absolute inset-0 border-[6px] border-slate-50 rounded-full"></div>
+            <div class="absolute inset-0 border-[6px] border-sky-500 border-t-transparent rounded-full animate-spin">
+            </div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <div class="w-3 h-3 bg-sky-500 rounded-full animate-ping"></div>
+            </div>
+        </div>
+        <p id="loading-text" class="mt-10 text-slate-500 font-black tracking-[0.4em] uppercase text-[9px]">Neural Assets
+            Syncing...</p>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
