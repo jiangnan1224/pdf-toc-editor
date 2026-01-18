@@ -110,12 +110,13 @@ def extract_toc():
         reader = PdfReader(filepath)
         toc_entries = []
         
-        # 提取前20页寻找目录
+        # 提取前 50 页寻找目录（扩大范围以应对长目录）
         # 更加鲁棒的正则：支持 章节 或 小节 (如 1.1 或 1.1.1)
-        # 匹配模式：[标题码] [标题内容] / [页码]
-        pattern = re.compile(r'(第\d+章|\d+(?:\.\d+)+)\s+(.+?)\s+/\s+(\d+)(?=\s*(?:第\d+章|\d+(?:\.\d+)+)|$)', re.UNICODE)
+        # 匹配模式：[标题码] [标题内容] [斜杠或点号分隔] [页码]
+        # 优化点：分隔符前后的空格设为可选，匹配更广泛
+        pattern = re.compile(r'(第\d+章|\d+(?:\.\d+)+)\s+(.+?)\s*[/／\s]\s*(\d+)(?=\s*(?:第\d+章|\d+(?:\.\d+)+)|$)', re.UNICODE)
         
-        for i in range(min(20, len(reader.pages))):
+        for i in range(min(50, len(reader.pages))):
             page = reader.pages[i]
             text = page.extract_text()
             if not text:
