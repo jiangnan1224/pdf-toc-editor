@@ -202,29 +202,30 @@ function renderTOCList() {
     elements.tocList.innerHTML = '';
     state.tocEntries.forEach((entry, index) => {
         const div = document.createElement('div');
-        const levelPaddings = ['pl-0', 'pl-10', 'pl-20'];
+        // Extreme mobile indenting: none or very little
+        const levelPaddings = ['pl-0', 'pl-2 lg:pl-10', 'pl-4 lg:pl-20'];
         const levelIndicators = ['bg-sky-500', 'bg-sky-300', 'bg-slate-200'];
 
-        div.className = `flex items-center gap-4 group animate-section ${levelPaddings[entry.level] || ''}`;
+        div.className = `flex items-center gap-1.5 lg:gap-4 group animate-section ${levelPaddings[entry.level] || ''}`;
         div.setAttribute('data-index', index);
 
         div.innerHTML = `
-            <div class="item-drag-handle p-2 transition-transform group-hover:scale-110">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16"></path></svg>
+            <div class="item-drag-handle p-1.5 lg:p-2 transition-transform active:scale-125 shrink-0 text-slate-300">
+                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8h16M4 16h16"></path></svg>
             </div>
-            <div class="h-12 w-1.5 flex-shrink-0 ${levelIndicators[entry.level] || 'bg-slate-200'} rounded-full opacity-60"></div>
-            <div class="flex-1 flex gap-3">
-                <input type="text" class="flex-1 bg-white border border-slate-100 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all placeholder:text-slate-300 text-slate-700 font-bold shadow-sm" placeholder="Title" value="${entry.title}" onchange="updateTOCEntry(${index}, 'title', this.value)">
-                <input type="number" class="w-24 bg-white border border-slate-100 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all text-center font-bold text-sky-500 shadow-sm" placeholder="P" value="${entry.page}" min="1" onchange="updateTOCEntry(${index}, 'page', parseInt(this.value))">
+            <div class="h-8 lg:h-12 w-0.5 lg:w-1 flex-shrink-0 ${levelIndicators[entry.level] || 'bg-slate-200'} rounded-full opacity-60"></div>
+            <div class="flex-1 flex items-center gap-1.5 lg:gap-3 min-w-0">
+                <input type="text" class="flex-1 min-w-0 bg-white border border-slate-100 rounded-lg lg:rounded-2xl px-2 lg:px-5 py-2 lg:py-3.5 text-[11px] lg:text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all placeholder:text-slate-300 text-slate-700 font-bold shadow-sm" placeholder="Title" value="${entry.title}" onchange="updateTOCEntry(${index}, 'title', this.value)">
+                <input type="number" class="w-12 lg:w-24 bg-white border border-slate-100 rounded-lg lg:rounded-2xl px-1 lg:px-5 py-2 lg:py-3.5 text-[11px] lg:text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all text-center font-bold text-sky-500 shadow-sm" placeholder="P" value="${entry.page}" min="1" onchange="updateTOCEntry(${index}, 'page', parseInt(this.value))">
+                <select class="bg-white border border-slate-100 rounded-lg lg:rounded-2xl px-1 lg:px-4 py-2 lg:py-3.5 text-[8px] lg:text-[10px] font-black uppercase tracking-tight lg:tracking-widest outline-none cursor-pointer hover:border-sky-500 transition-all text-slate-400 shadow-sm" onchange="updateTOCEntry(${index}, 'level', parseInt(this.value))">
+                    <option value="0" ${entry.level === 0 ? 'selected' : ''}>L1</option>
+                    <option value="1" ${entry.level === 1 ? 'selected' : ''}>L2</option>
+                    <option value="2" ${entry.level === 2 ? 'selected' : ''}>L3</option>
+                </select>
+                <button class="p-1.5 lg:p-4 text-slate-200 hover:text-red-500 transition-all shrink-0" onclick="removeTOCEntry(${index})">
+                    <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
             </div>
-            <select class="bg-white border border-slate-100 rounded-2xl px-4 py-3.5 text-[10px] font-black uppercase tracking-widest outline-none cursor-pointer hover:border-sky-500 transition-all text-slate-400 shadow-sm" onchange="updateTOCEntry(${index}, 'level', parseInt(this.value))">
-                <option value="0" ${entry.level === 0 ? 'selected' : ''}>L1 CHAPTER</option>
-                <option value="1" ${entry.level === 1 ? 'selected' : ''}>L2 SECTION</option>
-                <option value="2" ${entry.level === 2 ? 'selected' : ''}>L3 POINT</option>
-            </select>
-            <button class="p-4 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100" onclick="removeTOCEntry(${index})">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
         `;
         elements.tocList.appendChild(div);
     });
