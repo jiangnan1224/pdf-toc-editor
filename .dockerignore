@@ -1,0 +1,16 @@
+.git
+.github
+.DS_Store
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.db
+.venv
+venv
+ENV
+.env
+imgs
+brain
+*.log
+temp

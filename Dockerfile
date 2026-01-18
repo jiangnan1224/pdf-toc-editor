@@ -1,29 +1,41 @@
-# 使用轻量级 Python 基础镜像
-FROM python:3.11-slim
+# --- 阶段 1: 构建阶段 ---
+FROM python:3.11-slim as builder
 
-# 设置工作目录
 WORKDIR /app
 
-# 设置环境变量
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-ENV FLASK_APP app.py
-ENV FLASK_RUN_HOST 0.0.0.0
 
-# 安装系统依赖（如需要）
+# 安装构建工具（如果某些 pip 包需要编译）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# 安装 Python 依赖
+# 创建虚拟环境并安装依赖，减少最终镜像体积
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制项目代码
+# --- 阶段 2: 运行阶段 ---
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# 从构建阶段复制安装好的依赖库
+COPY --from=builder /opt/venv /opt/venv
+
+# 将虚拟环境路径加入 PATH
+ENV PATH="/opt/venv/bin:$PATH"
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV FLASK_APP app.py
+
+# 仅复制运行应用所需的代码（.dockerignore 会过滤掉 imgs 和 git 等大文件夹）
 COPY . .
 
-# 暴露端口（与 app.run 中的端口保持一致，或者使用环境变量）
 EXPOSE 5000
 
-# 使用 gunicorn 作为生产服务器运行
+# 使用 gunicorn 运行
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
