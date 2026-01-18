@@ -20,7 +20,7 @@
 
 1. **克隆仓库**
    ```bash
-   git clone <your-repo-url>
+   git clone https://github.com/jiangnan1224/pdf-toc-editor.git
    cd pdf-editor
    ```
 
