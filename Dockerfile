@@ -30,6 +30,8 @@ COPY --from=builder /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
 ENV FLASK_APP app.py
 
 # 仅复制运行应用所需的代码（.dockerignore 会过滤掉 imgs 和 git 等大文件夹）

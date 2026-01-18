@@ -111,37 +111,31 @@ def extract_toc():
         toc_entries = []
         
         # 提取前20页寻找目录
+        # 更加鲁棒的正则：支持 章节 或 小节 (如 1.1 或 1.1.1)
+        # 匹配模式：[标题码] [标题内容] / [页码]
+        pattern = re.compile(r'(第\d+章|\d+(?:\.\d+)+)\s+(.+?)\s+/\s+(\d+)(?=\s*(?:第\d+章|\d+(?:\.\d+)+)|$)', re.UNICODE)
+        
         for i in range(min(20, len(reader.pages))):
             page = reader.pages[i]
             text = page.extract_text()
-            lines = text.split('\n')
-            
-            for line in lines:
-                line = line.strip()
-                if not line:
-                    continue
+            if not text:
+                continue
                 
-                # 匹配章节格式
-                chapter_match = re.match(r'^第(\d+)章\s+(.+?)\s+/\s+(\d+)$', line)
-                if chapter_match:
-                    chapter_num, title, page = chapter_match.groups()
-                    toc_entries.append({
-                        'title': f'第{chapter_num}章  {title.strip()}',
-                        'page': int(page),
-                        'level': 0
-                    })
-                    continue
+            # 使用 finditer 处理一行中可能出现的多个条目
+            for match in pattern.finditer(text):
+                code, title, page_num = match.groups()
                 
-                # 匹配小节格式
-                section_match = re.match(r'^(\d+\.\d+(?:\.\d+)?)\s+(.+?)\s+/\s+(\d+)$', line)
-                if section_match:
-                    section_num, title, page = section_match.groups()
-                    level = section_num.count('.')
-                    toc_entries.append({
-                        'title': f'{section_num} {title.strip()}',
-                        'page': int(page),
-                        'level': level
-                    })
+                # 确定层级
+                if code.startswith('第'):
+                    level = 0
+                else:
+                    level = min(2, code.count('.'))
+                
+                toc_entries.append({
+                    'title': f"{code} {title.strip()}",
+                    'page': int(page_num),
+                    'level': level
+                })
         
         return jsonify({
             'success': True,
