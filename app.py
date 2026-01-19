@@ -12,6 +12,7 @@ import tempfile
 from datetime import datetime, timedelta
 import threading
 import time
+from ai_extractor import AITOCExtractor
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
@@ -144,6 +145,40 @@ def extract_toc():
         })
     except Exception as e:
         return jsonify({'error': f'目录提取失败: {str(e)}'}), 500
+
+@app.route('/api/extract-toc-ai', methods=['POST'])
+def extract_toc_ai():
+    """使用 AI 提取 PDF 目录"""
+    data = request.json
+    filename = data.get('filename')
+    api_key = data.get('api_key')
+    base_url = data.get('base_url')
+    model = data.get('model', 'gpt-4o')
+    page_start = data.get('page_start', 0)
+    page_end = data.get('page_end', 10)
+    
+    if not all([filename, api_key, base_url]):
+        return jsonify({'error': '缺少必要参数 (文件名, Key 或 BaseURL)'}), 400
+    
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    if not os.path.exists(filepath):
+        return jsonify({'error': '文件不存在'}), 404
+        
+    try:
+        extractor = AITOCExtractor(api_key=api_key, base_url=base_url, model=model)
+        # 页面范围转换（前端是 1-indexed，后端是 0-indexed）
+        start_idx = max(0, page_start - 1)
+        end_idx = page_end
+        
+        result = extractor.extract_toc(filepath, page_range=(start_idx, end_idx))
+        
+        return jsonify({
+            'success': True,
+            'toc': result.get('toc', []),
+            'page_offset': result.get('page_offset')
+        })
+    except Exception as e:
+        return jsonify({'error': f'AI 提取失败: {str(e)}'}), 500
 
 @app.route('/api/add-toc', methods=['POST'])
 def add_toc():

@@ -20,6 +20,7 @@ const elements = {
     sidebarFileMeta: document.getElementById('sidebar-file-meta'),
     pageOffset: document.getElementById('page-offset'),
     btnRestart: document.getElementById('btn-restart'),
+    btnAiSettings: document.getElementById('btn-ai-settings'),
 
     // Sections
     uploadSection: document.getElementById('upload-section'),
@@ -38,10 +39,25 @@ const elements = {
 
     // Actions
     btnExtract: document.getElementById('btn-extract'),
+    btnAIOCR: document.getElementById('btn-ai-ocr'),
     btnManual: document.getElementById('btn-manual'),
-    btnAddEntry: document.getElementById('btn-add-entry'),
+    btnAddEntry: document.getElementById('btn-add-entry'), // Fixed ID
     btnGenerate: document.getElementById('btn-generate'),
     btnDownload: document.getElementById('btn-download'),
+
+    // AI Modal
+    aiModal: document.getElementById('ai-modal'),
+    btnAIRun: document.getElementById('btn-ai-run'),
+    aiBaseUrl: document.getElementById('ai-base-url'),
+    aiApiKey: document.getElementById('ai-api-key'),
+    aiModel: document.getElementById('ai-model'),
+    aiPageStart: document.getElementById('ai-page-start'),
+    aiPageEnd: document.getElementById('ai-page-end'),
+
+    // Offset Calculator
+    calcPhys: document.getElementById('calc-phys'),
+    calcLogic: document.getElementById('calc-logic'),
+    calcResult: document.getElementById('calc-result'),
 
     // Shared
     tocList: document.getElementById('toc-list'),
@@ -54,10 +70,19 @@ const elements = {
 function init() {
     setupEventListeners();
     initSortable();
+    loadAIConfig();
+
+    // Initial calculator sync if elements exist
+    if (elements.calcPhys) {
+        const phys = parseInt(elements.calcPhys.value) || 0;
+        const logic = parseInt(elements.calcLogic.value) || 0;
+        elements.calcResult.textContent = phys - logic;
+    }
 }
 
 // Initialize SortableJS
 function initSortable() {
+    if (!elements.tocList) return;
     state.sortable = new Sortable(elements.tocList, {
         animation: 150,
         handle: '.item-drag-handle',
@@ -97,8 +122,15 @@ function setupEventListeners() {
 
     // Action Buttons
     elements.btnExtract.addEventListener('click', extractTOC);
+    elements.btnAIOCR.addEventListener('click', () => toggleAIModal(true));
+    elements.btnAiSettings.addEventListener('click', () => toggleAIModal(true));
+    elements.btnAIRun.addEventListener('click', extractTOCWithAI);
     elements.btnManual.addEventListener('click', startManualEntry);
-    elements.btnAddEntry.addEventListener('click', () => addTOCEntry());
+
+    if (elements.btnAddEntry) {
+        elements.btnAddEntry.addEventListener('click', () => addTOCEntry());
+    }
+
     elements.btnGenerate.addEventListener('click', generatePDF);
     elements.btnDownload.addEventListener('click', () => {
         let downloadName = state.outputFilename;
@@ -111,6 +143,17 @@ function setupEventListeners() {
         window.location.href = `/api/download/${state.outputFilename}?name=${encodeURIComponent(downloadName)}`;
     });
     elements.btnRestart.addEventListener('click', () => location.reload());
+
+    // Offset Calculator listeners
+    const updateCalculator = () => {
+        const phys = parseInt(elements.calcPhys.value) || 0;
+        const logic = parseInt(elements.calcLogic.value) || 0;
+        const result = phys - logic;
+        elements.calcResult.textContent = result;
+        elements.pageOffset.value = result; // Sync to sidebar
+    };
+    elements.calcPhys.addEventListener('input', updateCalculator);
+    elements.calcLogic.addEventListener('input', updateCalculator);
 }
 
 async function uploadFile(file) {
@@ -150,16 +193,104 @@ async function extractTOC() {
         const data = await response.json();
         if (data.success) {
             state.tocEntries = data.toc;
-            renderTOCList();
-            hideAllSections();
-            elements.editSection.classList.remove('hidden');
-            elements.entryCountPill.classList.remove('hidden');
-            updateStatus('EDITING CANVAS');
-            hideLoading();
+            processTOCResults();
         } else throw new Error(data.error);
     } catch (e) {
         hideLoading();
         alert('Extraction Failed: ' + e.message);
+    }
+}
+
+async function extractTOCWithAI() {
+    const config = {
+        api_key: elements.aiApiKey.value,
+        base_url: elements.aiBaseUrl.value,
+        model: elements.aiModel.value,
+        page_start: parseInt(elements.aiPageStart.value),
+        page_end: parseInt(elements.aiPageEnd.value)
+    };
+
+    if (!config.api_key || !config.base_url) return alert('Please fill in API Key and Base URL.');
+
+    saveAIConfig(config);
+    toggleAIModal(false);
+    showLoading('AI BRAIN THINKING...');
+
+    try {
+        const response = await fetch('/api/extract-toc-ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                filename: state.filename,
+                api_key: config.api_key,
+                base_url: config.base_url,
+                model: config.model,
+                page_start: config.page_start || 1,
+                page_end: config.page_end || 8
+            })
+        });
+        const data = await response.json();
+        if (data.success) {
+            state.tocEntries = data.toc;
+
+            // Note: We don't overwrite the human-calculated offset here
+            // unless the user specifically wants the AI to do it.
+            // For this guided mode, we trust the calculator's value already set in state.
+
+            processTOCResults();
+        } else throw new Error(data.error);
+    } catch (e) {
+        hideLoading();
+        alert('AI Extraction Failed: ' + e.message);
+    }
+}
+
+function backfillTOCPages(entries) {
+    if (!entries || entries.length === 0) return entries;
+
+    // Reverse scan to backfill missing pages (Part titles etc. often share page with first chapter)
+    let lastValidPage = null;
+    for (let i = entries.length - 1; i >= 0; i--) {
+        if (entries[i].page && !isNaN(entries[i].page)) {
+            lastValidPage = entries[i].page;
+        } else if (lastValidPage !== null) {
+            entries[i].page = lastValidPage;
+        }
+    }
+    return entries;
+}
+
+function processTOCResults() {
+    state.tocEntries = backfillTOCPages(state.tocEntries);
+    renderTOCList();
+    hideAllSections();
+    elements.editSection.classList.remove('hidden');
+    elements.entryCountPill.classList.remove('hidden');
+    updateStatus('EDITING CANVAS');
+    hideLoading();
+}
+
+function toggleAIModal(show) {
+    elements.aiModal.classList.toggle('hidden', !show);
+}
+
+function saveAIConfig(config) {
+    localStorage.setItem('pdf_marker_ai_config', JSON.stringify({
+        base_url: config.base_url,
+        model: config.model,
+        api_key: config.api_key
+    }));
+}
+
+function loadAIConfig() {
+    const saved = localStorage.getItem('pdf_marker_ai_config');
+    if (saved) {
+        const config = JSON.parse(saved);
+        elements.aiBaseUrl.value = config.base_url || 'https://api.openai.com/v1';
+        elements.aiModel.value = config.model || 'gpt-4o';
+        elements.aiApiKey.value = config.api_key || '';
+    } else {
+        elements.aiBaseUrl.value = 'https://api.openai.com/v1';
     }
 }
 
@@ -202,7 +333,6 @@ function renderTOCList() {
     elements.tocList.innerHTML = '';
     state.tocEntries.forEach((entry, index) => {
         const div = document.createElement('div');
-        // Extreme mobile indenting: none or very little
         const levelPaddings = ['pl-0', 'pl-2 lg:pl-10', 'pl-4 lg:pl-20'];
         const levelIndicators = ['bg-sky-500', 'bg-sky-300', 'bg-slate-200'];
 
@@ -265,6 +395,7 @@ function hideAllSections() {
 }
 
 function updateStatus(text) {
+    if (!elements.statusStep) return;
     elements.statusStep.innerHTML = `
         <div class="flex items-center gap-3 animate-section">
             <div class="w-2 h-2 rounded-full bg-sky-500 shadow-[0_0_10px_rgba(14,165,233,0.3)]"></div>
@@ -287,5 +418,6 @@ function hideLoading() {
 // Global scope for inline events
 window.removeTOCEntry = removeTOCEntry;
 window.updateTOCEntry = updateTOCEntry;
+window.toggleAIModal = toggleAIModal;
 
 document.addEventListener('DOMContentLoaded', init);

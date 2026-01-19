@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF目录编辑器 | 纯净工作台</title>
+    <title>PDF目录编辑器</title>
     <!-- Dependencies -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -170,16 +170,29 @@
 
             <!-- Action -->
             <div class="mt-auto p-6 lg:p-8 border-t border-slate-100 hidden lg:block">
-                <button id="btn-restart"
-                    class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-sky-500 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group">
-                    <svg class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" fill="none"
-                        stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
-                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
-                        </path>
-                    </svg>
-                    Reset Workspace
-                </button>
+                <div class="flex flex-col gap-2">
+                    <button id="btn-ai-settings"
+                        class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-sky-500 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group border border-slate-100 rounded-xl hover:border-sky-500/20">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                            </path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        AI Configuration
+                    </button>
+                    <button id="btn-restart"
+                        class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-red-400 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group">
+                        <svg class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
+                            </path>
+                        </svg>
+                        Clear Workspace
+                    </button>
+                </div>
             </div>
         </aside>
 
@@ -235,10 +248,10 @@
                 </section>
 
                 <!-- Stage 2: Strategy -->
-                <section id="toc-section" class="hidden max-w-4xl mx-auto space-y-6 lg:space-y-8 animate-section">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <section id="toc-section" class="hidden max-w-6xl mx-auto space-y-6 lg:space-y-8 animate-section">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                         <button id="btn-extract"
-                            class="glass-card p-8 lg:p-12 rounded-[2.5rem] lg:rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
+                            class="glass-card p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
                             <div
                                 class="w-12 h-12 lg:w-14 lg:h-14 bg-sky-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-6 lg:mb-8 text-white shadow-lg shadow-sky-500/10 transition-transform group-hover:-rotate-3">
                                 <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor"
@@ -249,11 +262,27 @@
                             </div>
                             <h3 class="text-lg lg:text-xl font-bold text-slate-800 mb-2 italic">Auto Scan</h3>
                             <p class="text-xs lg:text-sm text-slate-400 leading-relaxed font-medium">
-                                使用高精度算法解析文档元数据并自动生成树形书签。</p>
+                                快速扫描文本层元数据，适合标准 PDF 文件。</p>
+                        </button>
+
+                        <button id="btn-ai-ocr"
+                            class="glass-card p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] text-left border-sky-500/20 bg-sky-500/[0.02] hover:scale-[1.02] active:scale-[0.98] transition-all group">
+                            <div
+                                class="w-12 h-12 lg:w-14 lg:h-14 bg-gradient-to-br from-indigo-500 to-sky-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-6 lg:mb-8 text-white shadow-lg shadow-sky-500/20 transition-transform group-hover:scale-110">
+                                <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                                    </path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg lg:text-xl font-bold text-slate-800 mb-2 italic">AI Brain</h3>
+                            <p class="text-xs lg:text-sm text-slate-400 leading-relaxed font-medium">
+                                使用大模型多模态视觉识别，精准解析扫描版 PDF 目录。</p>
                         </button>
 
                         <button id="btn-manual"
-                            class="glass-card p-8 lg:p-12 rounded-[2.5rem] lg:rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
+                            class="glass-card p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
                             <div
                                 class="w-12 h-12 lg:w-14 lg:h-14 bg-slate-800 rounded-xl lg:rounded-2xl flex items-center justify-center mb-6 lg:mb-8 text-white shadow-lg shadow-slate-800/10 transition-transform group-hover:rotate-3">
                                 <svg class="w-6 h-6 lg:w-7 lg:h-7" fill="none" stroke="currentColor"
@@ -264,10 +293,141 @@
                             </div>
                             <h3 class="text-lg lg:text-xl font-bold text-slate-800 mb-2 italic">Empty Canvas</h3>
                             <p class="text-xs lg:text-sm text-slate-400 leading-relaxed font-medium">
-                                从零开始编织您的导航栏，支持实时预览与层级拖拽排序。</p>
+                                从零开始编织您的导航栏，支持实时预览与层级排序。</p>
                         </button>
                     </div>
                 </section>
+
+                <!-- AI Modal -->
+                <div id="ai-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4">
+                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="toggleAIModal(false)"></div>
+                    <div
+                        class="glass-card w-full max-w-4xl rounded-[2.5rem] overflow-hidden relative z-10 animate-section shadow-2xl flex flex-col lg:flex-row">
+
+                        <!-- Left: Settings -->
+                        <div
+                            class="lg:w-1/3 bg-slate-50/50 p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
+                            <div class="flex items-center gap-4 mb-8">
+                                <div
+                                    class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <h4 class="font-bold text-slate-800 uppercase tracking-tight">AI Settings</h4>
+                            </div>
+
+                            <div class="space-y-6">
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Base
+                                        URL</label>
+                                    <input id="ai-base-url" type="text" placeholder="https://api.openai.com/v1"
+                                        class="w-full bg-white border border-slate-100 rounded-xl px-4 py-3 text-xs focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-600">
+                                </div>
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">API
+                                        Key</label>
+                                    <input id="ai-api-key" type="password" placeholder="sk-..."
+                                        class="w-full bg-white border border-slate-100 rounded-xl px-4 py-3 text-xs focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-600">
+                                </div>
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Model</label>
+                                    <input id="ai-model" type="text" value="gpt-4o"
+                                        class="w-full bg-white border border-slate-100 rounded-xl px-4 py-3 text-xs focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-600">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right: Task & Helper -->
+                        <div class="flex-1 p-8 lg:p-12 flex flex-col">
+                            <div class="mb-10">
+                                <h3 class="text-2xl font-bold text-slate-800 tracking-tight">配置解析任务</h3>
+                                <p class="text-sm text-slate-400 font-medium">精确定义识别范围与页码映射关系</p>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 flex-1">
+                                <!-- Range -->
+                                <div class="space-y-6">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-2 h-2 rounded-full bg-sky-500"></div>
+                                        <h5 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">
+                                            第一步：定位目录</h5>
+                                    </div>
+                                    <p class="text-xs text-slate-400 italic mb-4">告诉 AI 目录在 PDF 的哪几页。</p>
+                                    <div class="flex items-center gap-4">
+                                        <div class="flex-1 space-y-2">
+                                            <label
+                                                class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">From
+                                                Page</label>
+                                            <input id="ai-page-start" type="number" value="1" min="1"
+                                                class="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-700">
+                                        </div>
+                                        <div class="pt-6 text-slate-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                                    d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1 space-y-2">
+                                            <label
+                                                class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">To
+                                                Page</label>
+                                            <input id="ai-page-end" type="number" value="8" min="1"
+                                                class="w-full bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3.5 text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-700">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Offset Helper -->
+                                <div class="space-y-6 bg-sky-50/30 rounded-3xl p-6 border border-sky-500/5">
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <div class="w-2 h-2 rounded-full bg-sky-500"></div>
+                                        <h5 class="text-[10px] font-black text-slate-800 uppercase tracking-widest">
+                                            第二步：计算偏移量</h5>
+                                    </div>
+                                    <div class="space-y-4">
+                                        <div class="flex items-center justify-between gap-3">
+                                            <p class="text-[10px] font-bold text-slate-500">如果 PDF 第</p>
+                                            <input id="calc-phys" type="number" value="17"
+                                                class="w-16 bg-white border border-slate-100 rounded-lg px-2 py-1.5 text-xs text-center font-bold text-sky-500">
+                                            <p class="text-[10px] font-bold text-slate-500">页，</p>
+                                        </div>
+                                        <div class="flex items-center justify-between gap-3">
+                                            <p class="text-[10px] font-bold text-slate-500">印着的页码是</p>
+                                            <input id="calc-logic" type="number" value="1"
+                                                class="w-16 bg-white border border-slate-100 rounded-lg px-2 py-1.5 text-xs text-center font-bold text-sky-500">
+                                            <p class="text-[10px] font-bold text-slate-500">页。</p>
+                                        </div>
+                                        <div class="pt-2 border-t border-sky-500/10 flex items-center justify-between">
+                                            <span class="text-[9px] font-black text-slate-400 uppercase">Calculated
+                                                Offset</span>
+                                            <span id="calc-result"
+                                                class="text-sm font-black text-slate-800 tracking-tighter">16</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mt-12 flex items-center gap-4">
+                                <button id="btn-ai-run"
+                                    class="flex-1 py-5 bg-sky-500 hover:bg-sky-600 text-white rounded-2xl font-bold text-base shadow-xl shadow-sky-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    确认并开始 AI 解析
+                                </button>
+                                <button onclick="toggleAIModal(false)"
+                                    class="px-8 py-5 text-slate-400 hover:text-slate-600 font-bold text-sm transition-all">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Stage 3: Workspace -->
                 <section id="edit-section" class="hidden max-w-5xl mx-auto animate-section">
