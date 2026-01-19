@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Uploads and temporary files
+uploads/
+*.pdf
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store

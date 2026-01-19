@@ -13,6 +13,9 @@ from datetime import datetime, timedelta
 import threading
 import time
 from ai_extractor import AITOCExtractor
+from dotenv import load_dotenv
+
+load_dotenv()  # 加载 .env 文件中的环境变量
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB max file size
@@ -157,7 +160,7 @@ def extract_toc_ai():
     """使用 AI 提取 PDF 目录"""
     data = request.json
     filename = data.get('filename')
-    api_key = data.get('api_key')
+    api_key = data.get('api_key') or os.environ.get('LLM_API_KEY')
     base_url = data.get('base_url')
     model = data.get('model', 'gpt-4o')
     page_start = data.get('page_start', 0)
@@ -257,6 +260,15 @@ def download_file(filename):
     display_name = request.args.get('name', filename)
     
     return send_file(filepath, as_attachment=True, download_name=display_name)
+
+@app.route('/api/config', methods=['GET'])
+def get_config():
+    """获取系统配置（如预置的 LLM 参数）"""
+    return jsonify({
+        'llm_base_url': os.environ.get('LLM_BASE_URL', ''),
+        'llm_model': os.environ.get('LLM_MODEL', 'gpt-4o'),
+        'has_system_key': bool(os.environ.get('LLM_API_KEY'))
+    })
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

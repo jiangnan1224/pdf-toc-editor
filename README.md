@@ -17,6 +17,36 @@
 
 ![Editor Preview](./imgs/Snipaste_2026-01-18_21-02-23.png)
 
+### 配置 AI 环境变量 (可选)
+  
+项目支持配置默认的 LLM 模型设置（适配 OpenAI 兼容格式）。配置后，用户在前端可直接使用“内置配置”。
+
+| 变量名 | 描述 | 示例 |
+| :--- | :--- | :--- |
+| `LLM_API_KEY` | 你的 API Key | `sk-xxxx...` |
+| `LLM_BASE_URL` | API 转发地址 | `https://api.openai.com/v1` |
+| `LLM_MODEL` | 使用的模型名称 | `gpt-4o` |
+
+#### 本地开发
+在项目根目录创建 `.env` 文件：
+```env
+LLM_API_KEY=your_key_here
+LLM_BASE_URL=https://api.openai.com/v1
+LLM_MODEL=gpt-4o
+```
+
+#### Docker 部署
+通过 `-e` 参数注入环境变量：
+```bash
+docker run -d \
+  -p 5000:5000 \
+  -e LLM_API_KEY=sk-xxxx \
+  -e LLM_BASE_URL=https://api.openai.com/v1 \
+  -e LLM_MODEL=gpt-4o \
+  --name pdf-toc-editor \
+  ghcr.io/jiangnan1224/pdf-toc-editor:latest
+```
+
 ## 🚀 快速开始
 
 ### 本地运行

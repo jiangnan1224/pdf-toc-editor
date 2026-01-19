@@ -8,7 +8,11 @@ const state = {
     pageCount: 0,
     tocEntries: [],
     outputFilename: null,
-    sortable: null // Reference to SortableJS instance
+    sortable: null, // Reference to SortableJS instance
+
+    // AI Config State
+    systemConfig: null,
+    useSystemConfig: false
 };
 
 // DOM Elements
@@ -20,7 +24,6 @@ const elements = {
     sidebarFileMeta: document.getElementById('sidebar-file-meta'),
     pageOffset: document.getElementById('page-offset'),
     btnRestart: document.getElementById('btn-restart'),
-    btnAiSettings: document.getElementById('btn-ai-settings'),
 
     // Sections
     uploadSection: document.getElementById('upload-section'),
@@ -38,12 +41,13 @@ const elements = {
     fileInput: document.getElementById('file-input'),
 
     // Actions
-    btnExtract: document.getElementById('btn-extract'),
+    btnStandardSetup: document.getElementById('btn-standard-setup'),
     btnAIOCR: document.getElementById('btn-ai-ocr'),
     btnManual: document.getElementById('btn-manual'),
-    btnAddEntry: document.getElementById('btn-add-entry'), // Fixed ID
+    btnAddEntry: document.getElementById('btn-add-entry'),
     btnGenerate: document.getElementById('btn-generate'),
     btnDownload: document.getElementById('btn-download'),
+    btnBackToStrategy: document.getElementById('btn-back-to-strategy'),
 
     // AI Modal
     aiModal: document.getElementById('ai-modal'),
@@ -53,6 +57,20 @@ const elements = {
     aiModel: document.getElementById('ai-model'),
     aiPageStart: document.getElementById('ai-page-start'),
     aiPageEnd: document.getElementById('ai-page-end'),
+
+    // Standard Modal
+    standardModal: document.getElementById('standard-modal'),
+    btnStandardSetup: document.getElementById('btn-standard-setup'),
+    btnStandardRun: document.getElementById('btn-std-run'),
+    stdCalcPhys: document.getElementById('std-calc-phys'),
+    stdCalcLogic: document.getElementById('std-calc-logic'),
+    stdCalcResult: document.getElementById('std-calc-result'),
+
+    // System Config UI
+    systemConfigToggle: document.getElementById('system-config-toggle'),
+    configToggleDot: document.getElementById('config-toggle-dot'),
+    aiSettingsFields: document.getElementById('ai-settings-fields'),
+    systemConfigBadge: document.getElementById('system-config-badge'),
 
     // Offset Calculator
     calcPhys: document.getElementById('calc-phys'),
@@ -71,6 +89,7 @@ function init() {
     setupEventListeners();
     initSortable();
     loadAIConfig();
+    fetchSystemConfig();
 
     // Initial calculator sync if elements exist
     if (elements.calcPhys) {
@@ -121,39 +140,79 @@ function setupEventListeners() {
     });
 
     // Action Buttons
-    elements.btnExtract.addEventListener('click', extractTOC);
-    elements.btnAIOCR.addEventListener('click', () => toggleAIModal(true));
-    elements.btnAiSettings.addEventListener('click', () => toggleAIModal(true));
-    elements.btnAIRun.addEventListener('click', extractTOCWithAI);
-    elements.btnManual.addEventListener('click', startManualEntry);
+    if (elements.btnAIOCR) elements.btnAIOCR.onclick = () => toggleAIModal(true);
+    if (elements.btnStandardSetup) elements.btnStandardSetup.onclick = () => toggleStandardModal(true);
+    if (elements.btnBackToStrategy) elements.btnBackToStrategy.onclick = () => {
+        hideAllSections();
+        elements.tocSection.classList.remove('hidden');
+        updateStatus('STRATEGY SELECT');
+    };
 
-    if (elements.btnAddEntry) {
-        elements.btnAddEntry.addEventListener('click', () => addTOCEntry());
+    if (elements.btnAddEntry) elements.btnAddEntry.onclick = () => addTOCEntry();
+    if (elements.btnGenerate) elements.btnGenerate.onclick = generatePDF;
+
+    if (elements.btnDownload) {
+        elements.btnDownload.onclick = () => {
+            let downloadName = state.outputFilename;
+            if (state.originalFilename) {
+                const nameParts = state.originalFilename.split('.');
+                const ext = nameParts.pop();
+                const base = nameParts.join('.');
+                downloadName = `${base}_完整目录.${ext}`;
+            }
+            window.location.href = `/api/download/${state.outputFilename}?name=${encodeURIComponent(downloadName)}`;
+        };
     }
 
-    elements.btnGenerate.addEventListener('click', generatePDF);
-    elements.btnDownload.addEventListener('click', () => {
-        let downloadName = state.outputFilename;
-        if (state.originalFilename) {
-            const nameParts = state.originalFilename.split('.');
-            const ext = nameParts.pop();
-            const base = nameParts.join('.');
-            downloadName = `${base}_完整目录.${ext}`;
-        }
-        window.location.href = `/api/download/${state.outputFilename}?name=${encodeURIComponent(downloadName)}`;
-    });
-    elements.btnRestart.addEventListener('click', () => location.reload());
+    if (elements.btnManual) {
+        elements.btnManual.onclick = () => {
+            state.tocEntries = [];
+            processTOCResults();
+        };
+    }
 
-    // Offset Calculator listeners
-    const updateCalculator = () => {
+    if (elements.btnAIRun) elements.btnAIRun.onclick = extractTOCWithAI;
+    if (elements.btnStandardRun) {
+        elements.btnStandardRun.onclick = () => {
+            toggleStandardModal(false);
+            extractTOC();
+        };
+    }
+
+    if (elements.btnRestart) elements.btnRestart.onclick = () => location.reload();
+
+    // Shared Calculator logic for AI Modal
+    const updateAICalc = () => {
         const phys = parseInt(elements.calcPhys.value) || 0;
         const logic = parseInt(elements.calcLogic.value) || 0;
-        const result = phys - logic;
-        elements.calcResult.textContent = result;
-        elements.pageOffset.value = result; // Sync to sidebar
+        const offset = phys - logic;
+        elements.calcResult.textContent = offset;
+        elements.pageOffset.value = offset;
+
+        // Sync to standard modal
+        elements.stdCalcPhys.value = phys;
+        elements.stdCalcLogic.value = logic;
+        elements.stdCalcResult.textContent = offset;
     };
-    elements.calcPhys.addEventListener('input', updateCalculator);
-    elements.calcLogic.addEventListener('input', updateCalculator);
+    elements.calcPhys.oninput = updateAICalc;
+    elements.calcLogic.oninput = updateAICalc;
+
+    // Shared Calculator logic for Standard Modal
+    const updateStdCalc = () => {
+        const phys = parseInt(elements.stdCalcPhys.value) || 0;
+        const logic = parseInt(elements.stdCalcLogic.value) || 0;
+        const offset = phys - logic;
+        elements.stdCalcResult.textContent = offset;
+        elements.pageOffset.value = offset;
+
+        // Sync to AI modal
+        elements.calcPhys.value = phys;
+        elements.calcLogic.value = logic;
+        elements.calcResult.textContent = offset;
+    };
+    elements.stdCalcPhys.oninput = updateStdCalc;
+    elements.stdCalcLogic.oninput = updateStdCalc;
+    elements.btnRestart.addEventListener('click', () => location.reload());
 }
 
 async function uploadFile(file) {
@@ -212,14 +271,17 @@ async function extractTOC() {
 
 async function extractTOCWithAI() {
     const config = {
-        api_key: elements.aiApiKey.value,
+        api_key: state.useSystemConfig ? "" : elements.aiApiKey.value,
         base_url: elements.aiBaseUrl.value,
         model: elements.aiModel.value,
         page_start: parseInt(elements.aiPageStart.value),
         page_end: parseInt(elements.aiPageEnd.value)
     };
 
-    if (!config.api_key || !config.base_url) return alert('Please fill in API Key and Base URL.');
+    // Validation: Require API Key only if NOT using system config
+    if ((!state.useSystemConfig && !config.api_key) || !config.base_url) {
+        return alert('Please fill in API Key and Base URL.');
+    }
 
     saveAIConfig(config);
     toggleAIModal(false);
@@ -280,9 +342,20 @@ function processTOCResults() {
 }
 
 function toggleAIModal(show) {
-    elements.aiModal.classList.toggle('hidden', !show);
+    if (show) {
+        elements.aiModal.classList.remove('pointer-events-none', 'opacity-0');
+    } else {
+        elements.aiModal.classList.add('pointer-events-none', 'opacity-0');
+    }
 }
 
+function toggleStandardModal(show) {
+    if (show) {
+        elements.standardModal.classList.remove('pointer-events-none', 'opacity-0');
+    } else {
+        elements.standardModal.classList.add('pointer-events-none', 'opacity-0');
+    }
+}
 function saveAIConfig(config) {
     localStorage.setItem('pdf_marker_ai_config', JSON.stringify({
         base_url: config.base_url,
@@ -324,6 +397,52 @@ function removeTOCEntry(index) {
 
 function updateTOCEntry(index, field, value) {
     state.tocEntries[index][field] = value;
+}
+
+async function fetchSystemConfig() {
+    try {
+        const response = await fetch('/api/config');
+        const data = await response.json();
+        state.systemConfig = data;
+
+        // Priority: If system config is available, always default to it
+        if (data.has_system_key && data.llm_base_url) {
+            elements.systemConfigToggle.classList.remove('hidden');
+            toggleSystemConfig(true);
+        }
+    } catch (e) {
+        console.error("Failed to fetch system config:", e);
+    }
+}
+
+function toggleSystemConfig(forceValue = null) {
+    state.useSystemConfig = forceValue !== null ? forceValue : !state.useSystemConfig;
+
+    if (state.useSystemConfig) {
+        // Active Built-in State
+        elements.systemConfigToggle.classList.add('ring-4', 'ring-sky-500/20', 'bg-sky-500', 'border-sky-600');
+        elements.systemConfigToggle.querySelector('span').classList.replace('text-sky-700', 'text-white');
+        elements.configToggleDot.classList.replace('bg-slate-300', 'bg-white');
+
+        elements.aiSettingsFields.classList.add('hidden');
+        elements.systemConfigBadge.classList.remove('hidden');
+
+        // Fill values for extraction
+        elements.aiBaseUrl.value = state.systemConfig.llm_base_url;
+        elements.aiModel.value = state.systemConfig.llm_model;
+        elements.aiApiKey.value = "●●●●●●●●";
+    } else {
+        // Active Custom State
+        elements.systemConfigToggle.classList.remove('ring-4', 'ring-sky-500/20', 'bg-sky-500', 'border-sky-600');
+        elements.systemConfigToggle.querySelector('span').classList.replace('text-white', 'text-sky-700');
+        elements.configToggleDot.classList.replace('bg-white', 'bg-slate-300');
+
+        elements.aiSettingsFields.classList.remove('hidden');
+        elements.systemConfigBadge.classList.add('hidden');
+
+        // Restore custom config
+        loadAIConfig();
+    }
 }
 
 // Re-map the state based on the DOM order after Drag & Drop
@@ -428,5 +547,7 @@ function hideLoading() {
 window.removeTOCEntry = removeTOCEntry;
 window.updateTOCEntry = updateTOCEntry;
 window.toggleAIModal = toggleAIModal;
+window.toggleStandardModal = toggleStandardModal;
+window.toggleSystemConfig = toggleSystemConfig;
 
 document.addEventListener('DOMContentLoaded', init);

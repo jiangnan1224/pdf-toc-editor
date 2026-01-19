@@ -129,10 +129,10 @@
                     </div>
                 </div>
 
-                <!-- Info Panel -->
+                <!-- Sidebar Info Display (Simplified) -->
                 <div id="sidebar-info" class="hidden animate-section">
-                    <div class="flex lg:flex-col gap-3 lg:gap-6 mb-4 lg:mb-0">
-                        <div class="flex-1 space-y-2">
+                    <div class="space-y-4">
+                        <div class="space-y-2">
                             <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1 lg:pl-0.5">
                                 Target</p>
                             <div
@@ -144,17 +144,9 @@
                                 </p>
                             </div>
                         </div>
-
-                        <div class="flex-1 lg:flex-none space-y-2">
-                            <div class="flex items-center justify-between pl-1 lg:pl-0.5">
-                                <label
-                                    class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Offset</label>
-                            </div>
-                            <input type="number" id="page-offset" value="16"
-                                class="w-full bg-white border border-slate-200 rounded-xl lg:rounded-xl px-3 py-2 lg:px-4 lg:py-3 text-xs lg:text-sm focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all text-slate-700 font-bold shadow-sm">
-                        </div>
+                        <!-- Hidden global offset reference -->
+                        <input type="hidden" id="page-offset" value="16">
                     </div>
-                    <p class="text-[10px] text-slate-400 leading-relaxed px-1 mt-4 hidden lg:block">调整文档正文起始页的页码偏差。</p>
                 </div>
 
                 <!-- Placeholder -->
@@ -170,27 +162,16 @@
 
             <!-- Action -->
             <div class="mt-auto p-6 lg:p-8 border-t border-slate-100 hidden lg:block">
-                <div class="flex flex-col gap-2">
-                    <button id="btn-ai-settings"
-                        class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-sky-500 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group border border-slate-100 rounded-xl hover:border-sky-500/20">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                            </path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        AI Configuration
-                    </button>
+                <div class="flex flex-col gap-3">
                     <button id="btn-restart"
-                        class="w-full py-3 text-[10px] font-black text-slate-400 hover:text-red-400 transition-all flex items-center justify-center gap-2 uppercase tracking-[0.2em] group">
+                        class="w-full py-4 px-4 bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center gap-3 text-xs font-black uppercase tracking-widest rounded-2xl shadow-sm hover:shadow-lg hover:shadow-red-500/20 group">
                         <svg class="w-4 h-4 transition-transform group-hover:rotate-180 duration-500" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                                 d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15">
                             </path>
                         </svg>
-                        Clear Workspace
+                        重置当前任务
                     </button>
                 </div>
             </div>
@@ -250,7 +231,7 @@
                 <!-- Stage 2: Strategy -->
                 <section id="toc-section" class="hidden max-w-6xl mx-auto space-y-6 lg:space-y-8 animate-section">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-                        <button id="btn-extract"
+                        <button id="btn-standard-setup"
                             class="glass-card p-8 lg:p-10 rounded-[2.5rem] lg:rounded-[3rem] text-left hover:scale-[1.02] active:scale-[0.98] transition-all group">
                             <div
                                 class="w-12 h-12 lg:w-14 lg:h-14 bg-sky-500 rounded-xl lg:rounded-2xl flex items-center justify-center mb-6 lg:mb-8 text-white shadow-lg shadow-sky-500/10 transition-transform group-hover:-rotate-3">
@@ -260,7 +241,7 @@
                                         d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg lg:text-xl font-bold text-slate-800 mb-2 italic">Auto Scan</h3>
+                            <h3 class="text-lg lg:text-xl font-bold text-slate-800 mb-2 italic">Quick Scan</h3>
                             <p class="text-xs lg:text-sm text-slate-400 leading-relaxed font-medium">
                                 快速扫描文本层元数据，适合标准 PDF 文件。</p>
                         </button>
@@ -299,7 +280,8 @@
                 </section>
 
                 <!-- AI Modal -->
-                <div id="ai-modal" class="hidden fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div id="ai-modal"
+                    class="fixed inset-0 z-[110] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-all duration-300">
                     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="toggleAIModal(false)"></div>
                     <div
                         class="glass-card w-full max-w-4xl rounded-[2.5rem] overflow-hidden relative z-10 animate-section shadow-2xl flex flex-col lg:flex-row">
@@ -307,19 +289,28 @@
                         <!-- Left: Settings -->
                         <div
                             class="lg:w-1/3 bg-slate-50/50 p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
-                            <div class="flex items-center gap-4 mb-8">
-                                <div
-                                    class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white shrink-0">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
-                                        </path>
-                                    </svg>
+                            <div class="flex items-center justify-between gap-4 mb-8">
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center text-white shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <h4 class="font-bold text-slate-800 uppercase tracking-tight">AI Settings</h4>
                                 </div>
-                                <h4 class="font-bold text-slate-800 uppercase tracking-tight">AI Settings</h4>
+                                <div id="system-config-toggle"
+                                    class="hidden flex items-center gap-2 bg-sky-100 px-4 py-2 rounded-full border border-sky-300 cursor-pointer transition-all hover:ring-4 hover:ring-sky-500/10 shadow-sm whitespace-nowrap"
+                                    onclick="toggleSystemConfig()">
+                                    <div id="config-toggle-dot" class="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+                                    <span
+                                        class="text-[11px] font-black text-sky-700 uppercase tracking-widest">内置配置</span>
+                                </div>
                             </div>
 
-                            <div class="space-y-6">
+                            <div id="ai-settings-fields" class="space-y-6">
                                 <div class="space-y-2">
                                     <label
                                         class="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Base
@@ -340,6 +331,24 @@
                                     <input id="ai-model" type="text" value="gpt-4o"
                                         class="w-full bg-white border border-slate-100 rounded-xl px-4 py-3 text-xs focus:ring-4 focus:ring-sky-500/5 focus:border-sky-500 outline-none transition-all font-bold text-slate-600">
                                 </div>
+                            </div>
+                            <div id="system-config-badge"
+                                class="hidden animate-section py-10 flex flex-col items-center justify-center text-center space-y-4">
+                                <div
+                                    class="w-14 h-14 bg-sky-500/10 text-sky-500 rounded-2xl flex items-center justify-center shadow-inner">
+                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.040A11.955 11.955 0 0112 21.056a11.955 11.955 0 018.618-3.040z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-[11px] font-black text-slate-800 uppercase tracking-widest">已启用内置模型
+                                    </p>
+                                    <p class="text-[10px] text-slate-400 font-bold px-6">管理员已预设全局 API 密钥，可直接使用</p>
+                                </div>
+                                <p class="text-[9px] text-sky-500 font-black uppercase tracking-tighter opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
+                                    onclick="toggleSystemConfig()">想要使用自己的密钥？点击右上方切换</p>
                             </div>
                         </div>
 
@@ -435,10 +444,20 @@
                         <!-- Head -->
                         <div
                             class="p-6 lg:p-8 lg:px-10 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between bg-white/50 gap-4">
-                            <div class="text-center sm:text-left">
-                                <h2 class="text-lg lg:text-xl font-bold text-slate-800">构建工作台</h2>
-                                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Drag
-                                    handles to sort • Double click field to edit</p>
+                            <div class="flex items-center gap-4 text-center sm:text-left">
+                                <button id="btn-back-to-strategy"
+                                    class="p-2 lg:p-3 text-slate-400 hover:text-sky-500 hover:bg-sky-50 rounded-xl lg:rounded-2xl transition-all group border border-transparent hover:border-sky-100 shadow-sm hover:shadow-md">
+                                    <svg class="w-5 h-5 transition-transform group-hover:-translate-x-1" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                            d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                </button>
+                                <div>
+                                    <h2 class="text-lg lg:text-xl font-bold text-slate-800">构建工作台</h2>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">Drag
+                                        handles to sort • Double click field to edit</p>
+                                </div>
                             </div>
                             <button id="btn-add-entry"
                                 class="w-full sm:w-auto bg-slate-900 hover:bg-slate-800 text-white px-8 py-3 rounded-xl font-bold text-[10px] uppercase tracking-widest transition-all shadow-lg active:scale-95">
@@ -501,6 +520,82 @@
         </div>
         <p id="loading-text" class="mt-10 text-slate-500 font-black tracking-[0.4em] uppercase text-[9px]">Neural Assets
             Syncing...</p>
+    </div>
+    <!-- Standard Extraction Setup Modal (NEW - Redesigned for Consistency) -->
+    <div id="standard-modal"
+        class="fixed inset-0 z-[110] flex items-center justify-center p-4 lg:p-10 opacity-0 pointer-events-none transition-all duration-300">
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-md" onclick="toggleStandardModal(false)"></div>
+        <div
+            class="glass-card w-full max-w-4xl rounded-[2.5rem] overflow-hidden relative z-10 animate-section shadow-2xl flex flex-col lg:flex-row">
+
+            <!-- Left: Info -->
+            <div
+                class="lg:w-1/3 bg-slate-50/50 p-8 lg:p-10 border-b lg:border-b-0 lg:border-r border-slate-100 flex flex-col justify-center">
+                <div
+                    class="w-16 h-16 bg-sky-500 rounded-[1.5rem] flex items-center justify-center mb-8 text-white shadow-xl shadow-sky-500/20">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-slate-800 mb-3">标准提取配置</h3>
+                <p class="text-sm text-slate-400 font-medium leading-relaxed">快速扫描 PDF
+                    原始文本层元数据。在开始扫描前，我们需要核对物理页面与逻辑页码的偏移量。</p>
+                <div class="mt-8 pt-8 border-t border-slate-100 hidden lg:block">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 italic">Standard Mode
+                    </p>
+                    <p class="text-[10px] text-slate-400 font-medium italic opacity-60">适合大多数带有文本层的标准数字版 PDF。</p>
+                </div>
+            </div>
+
+            <!-- Right: Calculator -->
+            <div class="flex-1 p-4 lg:p-8 flex flex-col">
+                <h3 class="text-2xl font-bold text-slate-800 tracking-tight">配置提取任务</h3>
+                <p class="text-sm text-slate-400 font-medium">核对物理页面与逻辑页码的映射关系</p>
+
+                <div class="space-y-2 max-w-lg mx-auto py-4 flex-1">
+                    <div
+                        class="bg-sky-50/30 rounded-[2.5rem] p-4 lg:px-24 space-y-8 border border-sky-500/5 shadow-inner">
+                        <div class="flex items-center justify-between gap-6">
+                            <p class="text-base font-bold text-slate-600">如果 PDF 第</p>
+                            <input id="std-calc-phys" type="number" value="17"
+                                class="w-24 bg-white border border-slate-100 rounded-2xl px-4 py-3 text-lg text-center font-black text-sky-500 shadow-sm focus:ring-8 focus:ring-sky-500/10 outline-none transition-all">
+                            <p class="text-base font-bold text-slate-600 flex-1 text-right">页，</p>
+                        </div>
+                        <div class="flex items-center justify-between gap-6">
+                            <p class="text-base font-bold text-slate-600">印着的页码是</p>
+                            <input id="std-calc-logic" type="number" value="1"
+                                class="w-24 bg-white border border-slate-100 rounded-2xl px-4 py-3 text-lg text-center font-black text-sky-500 shadow-sm focus:ring-8 focus:ring-sky-500/10 outline-none transition-all">
+                            <p class="text-base font-bold text-slate-600 flex-1 text-right">页。</p>
+                        </div>
+
+                        <div class="pt-8 border-t border-sky-500/10 flex items-center justify-between">
+                            <div class="space-y-1">
+                                <span
+                                    class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Calculated
+                                    Offset</span>
+                                <span class="text-[10px] text-slate-400 font-bold italic">Offset = 物理页 - 逻辑页</span>
+                            </div>
+                            <span id="std-calc-result"
+                                class="text-4xl font-black text-slate-800 tracking-tighter">16</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4 mt-2">
+                    <button id="btn-std-run"
+                        class="flex-1 py-5 bg-sky-500 hover:bg-sky-600 text-white rounded-2xl font-bold text-base shadow-xl shadow-sky-500/20 transition-all active:scale-95 flex items-center justify-center gap-3">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        确认并开始标准解析
+                    </button>
+                    <button onclick="toggleStandardModal(false)"
+                        class="px-8 py-5 text-slate-400 hover:text-slate-600 font-bold text-sm transition-all">取消</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
