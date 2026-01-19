@@ -120,19 +120,28 @@ class AITOCExtractor:
             })
 
         try:
-            print(f"--- AI Request: Sending {len(images)} images to model {self.model} ---")
-            response = self.client.chat.completions.create(
+            print(f"--- AI Request (Streaming): Sending {len(images)} images to model {self.model} ---")
+            stream = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
                 max_tokens=4096,
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
+                stream=True
             )
             
-            content = response.choices[0].message.content
-            print(f"--- AI Raw Response ---\n{content}\n--- End Raw Response ---")
+            collected_chunks = []
+            print("--- AI Streaming Content ---")
+            for chunk in stream:
+                content = chunk.choices[0].delta.content
+                if content:
+                    print(content, end="", flush=True)
+                    collected_chunks.append(content)
+            print("\n--- End AI Streaming ---")
+            
+            full_content = "".join(collected_chunks)
             
             # 使用鲁棒的解析逻辑
-            result = self.repair_json(content)
+            result = self.repair_json(full_content)
             if not result:
                 print("Repair failed, original content was invalid.")
                 return {"toc": []}
