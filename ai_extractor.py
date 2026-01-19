@@ -73,10 +73,9 @@ class AITOCExtractor:
             return None
 
     def extract_toc(self, pdf_path, page_range=(0, 20)):
-        """调用大模型进行目录提取，并自动识别页码偏移"""
+        """调用大模型进行目录结构提取"""
         images = self.pdf_to_base64_images(pdf_path, page_range)
         
-        # 增加页码元数据辅助 AI 计算偏移
         start_phys_page = page_range[0] + 1
         
         prompt = f"""
@@ -85,11 +84,9 @@ class AITOCExtractor:
         
         任务：
         1. 识别并提取目录信息 (title, page, level)。
-        2. 计算 page_offset (公式: offset = 物理页码 - 逻辑页码)。
         
         输出格式：
         {{
-          "page_offset": 16,
           "toc": [
             {{"title": "第一章", "page": 1, "level": 0}},
             ...
@@ -98,6 +95,7 @@ class AITOCExtractor:
         
         注意：
         - `level`: 0(大标题/章), 1(节), 2(小节)。
+        - `page`: 书上印着的逻辑页码。
         - 仅返回 JSON。即使目录很长，也请尽力返回。
         """
 
@@ -137,10 +135,9 @@ class AITOCExtractor:
             result = self.repair_json(content)
             if not result:
                 print("Repair failed, original content was invalid.")
-                return {"toc": [], "page_offset": None}
+                return {"toc": []}
             
-            # 提取 offset 和 toc
-            page_offset = result.get('page_offset', None)
+            # 提取 toc
             toc_list = []
             
             if "toc" in result and isinstance(result["toc"], list):
@@ -149,13 +146,12 @@ class AITOCExtractor:
                 toc_list = result
             else:
                 for key, value in result.items():
-                    if isinstance(value, list) and key != "page_offset":
+                    if isinstance(value, list):
                         toc_list = value
                         break
             
             return {
-                "toc": toc_list,
-                "page_offset": page_offset
+                "toc": toc_list
             }
                 
         except Exception as e:

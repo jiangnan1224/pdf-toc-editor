@@ -162,7 +162,15 @@ async function uploadFile(file) {
     formData.append('file', file);
     try {
         const response = await fetch('/api/upload', { method: 'POST', body: formData });
-        const data = await response.json();
+        let data;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.indexOf("application/json") !== -1) {
+            data = await response.json();
+        } else {
+            const text = await response.text();
+            throw new Error(`Server returned non-JSON response (Status ${response.status}): ${text.substring(0, 100)}...`);
+        }
+
         if (data.success) {
             state.filename = data.filename;
             state.originalFilename = data.original_filename;
@@ -178,6 +186,7 @@ async function uploadFile(file) {
         } else throw new Error(data.error);
     } catch (e) {
         hideLoading();
+        console.error('Upload error details:', e);
         alert('Upload Error: ' + e.message);
     }
 }

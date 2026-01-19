@@ -39,5 +39,5 @@ COPY . .
 
 EXPOSE 5000
 
-# 使用 gunicorn 运行
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# 使用 gunicorn 运行，增加超时时间以支持 AI 处理
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--timeout", "300", "app:app"]

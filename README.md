@@ -6,11 +6,14 @@
 
 ## ✨ 核心特性
 
-- 🤖 **智能目录提取**：内置高精度算法，一键扫描文档前 20 页并自动识别潜在层级结构。
+- 🤖 **智能目录提取**：内置高精度算法，一键扫描文档前页并自动识别潜在层级结构。
+- 🧠 **AI 视觉解析 (NEW)**：集成 OpenAI 兼容多模态模型，支持**扫描版 PDF** 的图片级目录还原。
 - 🖱️ **自由拖拽排序**：支持通过手柄直接拖拽调整目录顺序，所见即所得。
 - 📐 **多层级支持**：支持三级目录结构（章、节、点），轻松应对复杂文档。
-- 🔢 **页码偏置修正**：自适应纸质页码与电子页码的偏差，确保跳转精准无误。
+- 🔢 **页码偏置修正**：内置**页码计算器**，自适应纸质页码与电子页码的偏差，确保跳转精准无误。
 - 📁 **本地化存储**：尊重隐私，文件处理完成后自动清理服务器残留。
+
+![AI OCR Preview](./imgs/Snipaste_2026-01-19_18-07-57.png)
 
 ![Editor Preview](./imgs/Snipaste_2026-01-18_21-02-23.png)
 
@@ -49,9 +52,9 @@
    访问 `http://localhost:5000`。
 
 ## 🛠️ 技术栈
-
-- **后端**: Python (Flask), pypdf
-- **前端**: HTML5, Vanilla JavaScript, Tailwind CSS (Style Engine)
+ 
+- **后端**: Python (Flask), pypdf, PyMuPDF, OpenAI SDK
+- **前端**: HTML5, Vanilla JavaScript, Tailwind CSS (Style Engine), SortableJS
 - **容器化**: Docker, GitHub Actions (CI/CD)
 
 ## ⚖️ 许可

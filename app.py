@@ -15,7 +15,7 @@ import time
 from ai_extractor import AITOCExtractor
 
 app = Flask(__name__)
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024  # 100MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024  # 200MB max file size
 app.config['UPLOAD_FOLDER'] = tempfile.gettempdir()
 
 def cleanup_old_files():
@@ -66,6 +66,7 @@ def upload_pdf():
         return jsonify({'error': '没有选择文件'}), 400
     
     if file and allowed_file(file.filename):
+        print(f"--- Upload Started: {file.filename} ---")
         raw_filename = file.filename
         filename = secure_filename(raw_filename)
         # If secure_filename stripped everything (e.g. for purely Chinese names)
@@ -75,10 +76,13 @@ def upload_pdf():
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
         unique_filename = f"{timestamp}_{filename}"
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
-        file.save(filepath)
         
-        # 获取PDF信息
         try:
+            file.save(filepath)
+            size_mb = os.path.getsize(filepath) / (1024 * 1024)
+            print(f"--- Upload Finished: {unique_filename} ({size_mb:.2f} MB) ---")
+            
+            # 获取PDF信息
             reader = PdfReader(filepath)
             page_count = len(reader.pages)
             
@@ -89,8 +93,10 @@ def upload_pdf():
                 'page_count': page_count
             })
         except Exception as e:
-            os.remove(filepath)
-            return jsonify({'error': f'PDF读取失败: {str(e)}'}), 400
+            if os.path.exists(filepath):
+                os.remove(filepath)
+            print(f"Upload Error: {str(e)}")
+            return jsonify({'error': f'上传处理失败: {str(e)}'}), 500
     
     return jsonify({'error': '不支持的文件格式'}), 400
 
@@ -174,8 +180,7 @@ def extract_toc_ai():
         
         return jsonify({
             'success': True,
-            'toc': result.get('toc', []),
-            'page_offset': result.get('page_offset')
+            'toc': result.get('toc', [])
         })
     except Exception as e:
         return jsonify({'error': f'AI 提取失败: {str(e)}'}), 500
